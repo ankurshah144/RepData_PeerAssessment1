@@ -17,8 +17,10 @@ activity <- read.csv("activity.csv")  # read file
 1. Histogram with number of steps for each day
 ```{r dailysteps_hist}
 dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
-library(lattice)
-histogram(dailysteps, type="count", breaks=length(dailysteps))
+# library(lattice)
+# histogram(dailysteps, type="count", breaks=length(dailysteps))  # output similar to using ggplot2
+library(ggplot2)
+qplot(dailysteps)
 ```
 
 2. **mean** and **median** total number of steps taken per day
@@ -33,7 +35,14 @@ summary(dailysteps)  # different approach
 ```{r interval_average}
 intervalsteps <- tapply(activity$steps, factor(activity$interval)
                             , mean, na.rm=TRUE)  # 5 min interval avg
-# code for timeseries plot
+# if using lattice library
+# xyplot(intervalsteps ~ factor(activity$interval), type="l"
+#            , xlab = "5-min interval", ylab = "Number of Steps"
+#            , scales = list(x = list(tick.number = 24)))
+
+# easy plot using ggplot2
+qplot(as.numeric(names(intervalsteps)), intervalsteps
+            , geom="line", xlab="Time of Day HHMM", ylab="Average Steps")
 ```
 
 2. Identify the 5-min interval that contains the maximum number of steps
@@ -42,7 +51,15 @@ moststeps <- order(intervalsteps, decreasing=TRUE)  # daily average in decreasin
 intervalsteps[moststeps[1]]  # interval with maximum number of steps
 ```
 
-## Inputing missing values
+## Inputting missing values
+1. Total number of missing values in the dataset
+```{r total_na}
+sum(is.na(activity$steps))
+```
+2. Fill-in missing values in the dataset
+```{r na_filler}
+
+```
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
