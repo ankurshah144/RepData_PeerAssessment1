@@ -1,0 +1,48 @@
+---
+title: "RepData Assignment_1.Rmd"
+output: html_document
+description: R Markdown document for Coursera course "Reproducible Research", Peer Assessment 1
+---
+# Reproducible Research: Peer Assessment 1
+R Markdown document for Reproducible Research Peer Assessment 1
+
+## Loading and preprocessing the data
+```{r preprocessing}
+setwd("~/DS Toolbox/Github/RepData_PeerAssessment1")
+activity <- read.csv("activity.csv")  # read file
+#activity$date <- as.Date(activity$date, "%Y-%m-%d")  # convert date column to date data type
+```
+
+## What is mean total number of steps taken per day?
+1. Histogram with number of steps for each day
+```{r dailysteps_hist}
+dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
+library(lattice)
+histogram(dailysteps, type="count", breaks=length(dailysteps))
+```
+
+2. **mean** and **median** total number of steps taken per day
+```{r mean_median}
+mean(dailysteps)  # mean
+median(dailysteps)  # median
+summary(dailysteps)  # different approach
+```
+
+## What is the average daily activity pattern?
+1. Time-series plot of the 5-minute interval and average number of steps taken
+```{r interval_average}
+intervalsteps <- tapply(activity$steps, factor(activity$interval)
+                            , mean, na.rm=TRUE)  # 5 min interval avg
+# code for timeseries plot
+```
+
+2. Identify the 5-min interval that contains the maximum number of steps
+```{r max_daily_steps}
+moststeps <- order(intervalsteps, decreasing=TRUE)  # daily average in decreasing order
+intervalsteps[moststeps[1]]  # interval with maximum number of steps
+```
+
+## Inputing missing values
+
+## Are there differences in activity patterns between weekdays and weekends?
+
