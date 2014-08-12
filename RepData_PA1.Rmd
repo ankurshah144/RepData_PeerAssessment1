@@ -17,10 +17,8 @@ activity <- read.csv("activity.csv")  # read file
 1. Histogram with number of steps for each day
 ```{r dailysteps_hist}
 dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
-# library(lattice)
-# histogram(dailysteps, type="count", breaks=length(dailysteps))  # output similar to using ggplot2
-library(ggplot2)
-qplot(dailysteps)
+library(lattice)
+histogram(dailysteps, type="count", breaks=length(dailysteps), col="gray")  # generate histogram
 ```
 
 2. **mean** and **median** total number of steps taken per day
@@ -33,16 +31,11 @@ summary(dailysteps)  # different approach
 ## What is the average daily activity pattern?
 1. Time-series plot of the 5-minute interval and average number of steps taken
 ```{r interval_average}
-intervalsteps <- tapply(activity$steps, factor(activity$interval)
+intervalsteps <- sapply(split(activity$steps, activity$interval)
                             , mean, na.rm=TRUE)  # 5 min interval avg
-# if using lattice library
-# xyplot(intervalsteps ~ factor(activity$interval), type="l"
-#            , xlab = "5-min interval", ylab = "Number of Steps"
-#            , scales = list(x = list(tick.number = 24)))
-
-# easy plot using ggplot2
+library(ggplot2)
 qplot(as.numeric(names(intervalsteps)), intervalsteps
-            , geom="line", xlab="Time of Day HHMM", ylab="Average Steps")
+            , geom="line", xlab="Time of Day HHMM", ylab="Average Steps")  # generate plot
 ```
 
 2. Identify the 5-min interval that contains the maximum number of steps
@@ -56,10 +49,38 @@ intervalsteps[moststeps[1]]  # interval with maximum number of steps
 ```{r total_na}
 sum(is.na(activity$steps))
 ```
-2. Fill-in missing values in the dataset
+2. Creating a strategy to fill-in missing values in the dataset
+```{r na_strategy}
+# filler function -- 10% of average of each day; if not available, '5'
+filler <- function(x) {
+    if (is.nan(mean(x, na.rm=TRUE)))  5
+    else mean(x, na.rm=TRUE)/10
+}
+dailymean <- tapply(activity$steps, activity$date, filler)
+```
+3. New dataset copied from the original, but with missing values filled-in
 ```{r na_filler}
-
+newactivity <- activity
+# fetch array of dates and values corresponding to NA steps and apply to missing values
+newactivity <- within(newactivity
+                        , steps[is.na(steps)] <- dailymean[newactivity$date[is.na(newactivity$steps)]])
+```
+4. 3-parts
+* Histogram of new total steps per day
+```{r newdata_hist}
+new.dailysteps <- tapply(newactivity$steps, newactivity$date, sum, na.rm=TRUE)  # calculate daily steps
+histogram(new.dailysteps, type="count", breaks=length(new.dailysteps), col="gray")  # generate histogram
 ```
 
-## Are there differences in activity patterns between weekdays and weekends?
+* Compare mean and median against previously calculated values
 
+```{r newdata_mm}
+c(old.mean = mean(new.dailysteps), new.mean = mean(dailysteps))
+c(old.median = median(new.dailysteps), new.median = median(dailysteps))
+```
+
+<span style="color:blue">
+Interesting results - mean has increased, but median remains the same!
+</span>
+
+## Are there differences in activity patterns between weekdays and weekends?
