@@ -4,15 +4,17 @@ output: html_document
 description: R Markdown document for Coursera course "Reproducible Research", Peer Assessment 1
 ---
 
+<span style="color:blue">
 This is the R Markdown document for Reproducible Research Peer Assessment 1.
+</span>
 
-## Loading and preprocessing the data
+### Loading and preprocessing the data
 ```{r preprocessing}
 setwd("~/DS Toolbox/Github/RepData_PeerAssessment1")
 activity <- read.csv("activity.csv")  # read file
 ```
 
-## What is mean total number of steps taken per day?
+### What is mean total number of steps taken per day?
 1. Histogram with number of steps for each day
 ```{r dailysteps_hist}
 dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
@@ -26,7 +28,7 @@ mean(dailysteps)  # mean
 median(dailysteps)  # median
 ```
 
-## What is the average daily activity pattern?
+### What is the average daily activity pattern?
 1. Time-series plot of the 5-minute interval and average number of steps taken
 ```{r interval_average}
 intervalsteps <- sapply(split(activity$steps, activity$interval)
@@ -42,7 +44,7 @@ moststeps <- order(intervalsteps, decreasing=TRUE)  # daily average in decreasin
 intervalsteps[moststeps[1]]  # interval with maximum number of steps
 ```
 
-## Inputting missing values
+### Inputting missing values
 1. Total number of missing values in the dataset
 ```{r total_na}
 sum(is.na(activity$steps))
@@ -67,7 +69,7 @@ newactivity <- within(newactivity
 * Histogram of new total steps per day
 ```{r newdata_hist}
 new.dailysteps <- tapply(newactivity$steps, newactivity$date, sum, na.rm=TRUE)  # calculate daily steps
-histogram(new.dailysteps, type="count", breaks=length(new.dailysteps), col="gray")  # generate histogram
+histogram(new.dailysteps, type="count", breaks=length(new.dailysteps), col="steelblue")
 ```
 
 * Compare mean and median against previously calculated values
@@ -81,7 +83,7 @@ c(old.mean = mean(new.dailysteps), new.mean = mean(dailysteps)
 Interesting results - mean has increased, but median remains the same!
 </span>
 
-## Are there differences in activity patterns between weekdays and weekends?
+### Are there differences in activity patterns between weekdays and weekends?
 1. Add a new column indicating whether a given date is weekday or weekend
 ```{r weekdays}
 library(lubridate)
