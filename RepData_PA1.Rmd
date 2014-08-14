@@ -1,16 +1,15 @@
 ---
-title: "RepData Assignment_1.Rmd"
+title: "Reproducible Research: Peer Assessment 1"
 output: html_document
 description: R Markdown document for Coursera course "Reproducible Research", Peer Assessment 1
 ---
-# Reproducible Research: Peer Assessment 1
-R Markdown document for Reproducible Research Peer Assessment 1
+
+This is the R Markdown document for Reproducible Research Peer Assessment 1.
 
 ## Loading and preprocessing the data
 ```{r preprocessing}
 setwd("~/DS Toolbox/Github/RepData_PeerAssessment1")
 activity <- read.csv("activity.csv")  # read file
-#activity$date <- as.Date(activity$date, "%Y-%m-%d")  # convert date column to date data type
 ```
 
 ## What is mean total number of steps taken per day?
@@ -18,14 +17,13 @@ activity <- read.csv("activity.csv")  # read file
 ```{r dailysteps_hist}
 dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
 library(lattice)
-histogram(dailysteps, type="count", breaks=length(dailysteps), col="gray")  # generate histogram
+histogram(dailysteps, type="count", breaks=length(dailysteps), col="steelblue")  # generate histogram
 ```
 
 2. **mean** and **median** total number of steps taken per day
 ```{r mean_median}
 mean(dailysteps)  # mean
 median(dailysteps)  # median
-summary(dailysteps)  # different approach
 ```
 
 ## What is the average daily activity pattern?
@@ -53,8 +51,8 @@ sum(is.na(activity$steps))
 ```{r na_strategy}
 # filler function -- 10% of average of each day; if not available, '5'
 filler <- function(x) {
-    if (is.nan(mean(x, na.rm=TRUE)))  5
-    else mean(x, na.rm=TRUE)/10
+            if (is.nan(mean(x, na.rm=TRUE)))  5
+            else mean(x, na.rm=TRUE)/10
 }
 dailymean <- tapply(activity$steps, activity$date, filler)
 ```
@@ -75,8 +73,8 @@ histogram(new.dailysteps, type="count", breaks=length(new.dailysteps), col="gray
 * Compare mean and median against previously calculated values
 
 ```{r newdata_mm}
-c(old.mean = mean(new.dailysteps), new.mean = mean(dailysteps))
-c(old.median = median(new.dailysteps), new.median = median(dailysteps))
+c(old.mean = mean(new.dailysteps), new.mean = mean(dailysteps)
+    , old.median = median(new.dailysteps), new.median = median(dailysteps))
 ```
 
 <span style="color:blue">
@@ -84,3 +82,21 @@ Interesting results - mean has increased, but median remains the same!
 </span>
 
 ## Are there differences in activity patterns between weekdays and weekends?
+1. Add a new column indicating whether a given date is weekday or weekend
+```{r weekdays}
+library(lubridate)
+newactivity$dayofweek <- ifelse (wday(as.Date(newactivity$date, "%Y-%m-%d")) %in% c(1, 7)
+                                 , yes="weekend", no="weekday")  # add new column day of week
+detach(package:lubridate)
+newactivity$dayofweek <- factor(newactivity$dayofweek)
+newactivity[c(100, 300, 1600), ]
+```
+2. Create a panel plot
+```{r panel_plot}
+library(plyr)
+dayOfWeekAvg <- ddply(newactivity, .(dayofweek, interval)
+                        , summarize, avgsteps=mean(steps))  # determine if a date is weekday or weekend
+baseplot <- qplot(interval, avgsteps, data=dayOfWeekAvg, facets=dayofweek ~ .
+        , geom="line", xlab = "Interval", ylab = "Number of Steps")  # create plot elements
+baseplot + geom_line(colour="blue") + theme_bw()
+```
