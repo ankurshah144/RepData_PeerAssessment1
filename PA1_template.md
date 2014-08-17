@@ -16,17 +16,19 @@ activity <- read.csv("activity.csv")  # read file
 ```
 
 ### What is mean total number of steps taken per day?
-1. Histogram with number of steps for each day
+- Histogram with number of steps for each day
 
 ```r
 dailysteps <- tapply(activity$steps, activity$date, sum, na.rm=TRUE)  # calculate daily steps
 library(lattice)
-histogram(dailysteps, type="count", breaks=length(dailysteps), col="steelblue")  # generate histogram
+## Generate histogram - please note this might look different than your output because my
+## histogram has two breaks between 10000 and 15000
+histogram(dailysteps, type="count", col="steelblue")
 ```
 
 ![plot of chunk dailysteps_hist](figure/dailysteps_hist.png) 
 
-2. **mean** and **median** total number of steps taken per day
+- **mean** and **median** total number of steps taken per day
 
 ```r
 mean(dailysteps)  # mean
@@ -45,7 +47,7 @@ median(dailysteps)  # median
 ```
 
 ### What is the average daily activity pattern?
-1. Time-series plot of the 5-minute interval and average number of steps taken
+- Time-series plot of the 5-minute interval and average number of steps taken
 
 ```r
 intervalsteps <- sapply(split(activity$steps, activity$interval)
@@ -57,7 +59,7 @@ qplot(as.numeric(names(intervalsteps)), intervalsteps
 
 ![plot of chunk interval_average](figure/interval_average.png) 
 
-2. Identify the 5-min interval that contains the maximum number of steps
+- Identify the 5-min interval that contains the maximum number of steps
 
 ```r
 moststeps <- order(intervalsteps, decreasing=TRUE)  # daily average in decreasing order
@@ -70,7 +72,7 @@ intervalsteps[moststeps[1]]  # interval with maximum number of steps
 ```
 
 ### Inputting missing values
-1. Total number of missing values in the dataset
+- Total number of missing values in the dataset
 
 ```r
 sum(is.na(activity$steps))
@@ -79,7 +81,7 @@ sum(is.na(activity$steps))
 ```
 ## [1] 2304
 ```
-2. Creating a strategy to fill-in missing values in the dataset
+- Creating a strategy to fill-in missing values in the dataset
 
 ```r
 # filler function -- 10% of average of each day; if not available, '5'
@@ -89,7 +91,7 @@ filler <- function(x) {
 }
 dailymean <- tapply(activity$steps, activity$date, filler)
 ```
-3. New dataset copied from the original, but with missing values filled-in
+- New dataset copied from the original, but with missing values filled-in
 
 ```r
 newactivity <- activity
@@ -97,12 +99,14 @@ newactivity <- activity
 newactivity <- within(newactivity
                         , steps[is.na(steps)] <- dailymean[newactivity$date[is.na(newactivity$steps)]])
 ```
-4. 3-parts
+
 * Histogram of new total steps per day
 
 ```r
 new.dailysteps <- tapply(newactivity$steps, newactivity$date, sum, na.rm=TRUE)  # calculate daily steps
-histogram(new.dailysteps, type="count", breaks=length(new.dailysteps), col="steelblue")
+## Generate histogram - please note this might look different than your output because my
+## histogram has two breaks between 10000 and 15000
+histogram(new.dailysteps, type="count", col="steelblue")
 ```
 
 ![plot of chunk newdata_hist](figure/newdata_hist.png) 
@@ -125,10 +129,22 @@ Interesting results - mean has increased, but median remains the same!
 </span>
 
 ### Are there differences in activity patterns between weekdays and weekends?
-1. Add a new column indicating whether a given date is weekday or weekend
+- Add a new column indicating whether a given date is weekday or weekend
 
 ```r
 library(lubridate)
+```
+
+```
+## 
+## Attaching package: 'lubridate'
+## 
+## The following object is masked from 'package:plyr':
+## 
+##     here
+```
+
+```r
 newactivity$dayofweek <- ifelse (wday(as.Date(newactivity$date, "%Y-%m-%d")) %in% c(1, 7)
                                  , yes="weekend", no="weekday")  # add new column day of week
 detach(package:lubridate)
@@ -142,7 +158,7 @@ newactivity[c(100, 300, 1600), ]
 ## 300      0 2012-10-02       55   weekday
 ## 1600   511 2012-10-06     1315   weekend
 ```
-2. Create a panel plot
+- Create a panel plot
 
 ```r
 library(plyr)
